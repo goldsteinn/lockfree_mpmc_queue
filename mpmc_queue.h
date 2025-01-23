@@ -301,10 +301,16 @@ public:
                     return true;
                 }
             }
-            else if ((seq == static_cast<index_type>((wr_index << 1) | 1U)) ||
-                     (static_cast<index_type>(seq) == static_cast<index_type>((wr_index + _array.size()) << 1)))
+            else if ((seq == static_cast<index_type>((wr_index << 1) | 1U)))
             {
                 _write_index.compare_exchange_strong(wr_index, wr_index + 1);
+            }
+            else if ((static_cast<index_type>(seq) == static_cast<index_type>((wr_index + _array.size()) << 1)))
+            {
+                if constexpr (lazy_push)
+                {
+                    _write_index.compare_exchange_strong(wr_index, wr_index + 1);
+                }
             }
             else if (static_cast<index_type>(seq + (_array.size() << 1)) ==
                      static_cast<index_type>((wr_index << 1) | 1U))
